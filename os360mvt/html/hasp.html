@@ -1,0 +1,189 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Building and installing HASP</title>
+<h1>OS/360 on Hercules: Bui;ding and installing HASP</h1>
+</head>
+<body>
+<hr>
+<h3>10. Building and installing HASP</h3>
+<h4><a name="10.1">10.1 Overview</a></h4>
+<p>HASP is to MVT what JES2 is to later operating systems: a job entry
+subsystem. It manages SYSIN and SYSOUT, keeps a queue of jobs ready
+to begin execution, and starts them according to a priority scheme.
+It makes running MVT much simpler and more efficient. It was quite rare to
+find an MVT system that did not include HASP.</p>
+<p>Unlike JES2, however, HASP is an add-on, written and maintained
+separately from the main OS. As such, there are hooks that must be added
+to MVT in order to give HASP control when needed. Those hooks were added
+before stage 1 was run, by the <code>HASPHOOK</code> job. HASP itself must
+still be generated, however.</p>
+<p>HASP generation is done in a somewhat different manner than MVT. HASP
+parameters are applied to a source file by <code>HASPGEN</code>, a program
+developed for the task. HASP is then assembled, and an SVC linked into the
+MVT nucleus. Before HASP itself is linked, however, its overlay structure
+must be generated; this is done by another HASP utility, HASPOBLD. Once the
+linkedit is complete, HASP may be started; an IPL is necessary if the SVC
+has just been installed.</p>
+<p>The version of HASP that will be installed is HASP 4.0.
+This version was shipped with the first virtual storage MVT successor,
+OS/VS2 SVS. As such, it was written to be used with that system. When
+it was released, several enterprising folks developed changes to make it
+work with MVT; these changes are known as the HASP MVT retrofit mods. One
+consequence of this is that the XF assembler, <code>IFOX00</code>, must be
+used to build HASP. Fortunately, <code>IFOX00</code>, which was shipped
+with SVS, will run unchanged on MVT, and it's even a bit faster and less
+cantankerous than <code>IEUASM</code>, the MVT F-level assembler.</p>
+<p>The jobs in this section were originally developed by Kevin
+Leonard. I have retained his job names. There are minor differences
+fron the JCL he supplies on <a href="http://kleonard.home.att.net/hasp">his
+HASP web page</a>; I'll mention those changes where needed.</p>
+<p>Some of these tasks only need to be performed once to load HASP
+onto disk. Some will need to be run whenever changes to the HASP
+parameters are desired. The jobs with names beginning with
+<code>I</code> are one-time-only; the ones beginning with
+<code>P</code> are rerun whenever HASP is to be changed.</p>
+<h4><a name="10.2">10.2 Allocating HASP datasets: I01ALCIN </a></h4>
+<p>This job allocates the datasets that HASP will be
+stored in. There are separate source datasets for the HASP source as
+supplied by IBM, IBM-supplied HASP APARs, the MVT retrofit
+modifications, and the final, modified system. There are also datasets
+to store the assembled object decks, the overlay library used by HASPOBLD,
+HASP utility programs such as HASPGEN, and the XF assembler. It is
+in <code>haspjcl/i01alcin.jcl</code>. One change has been made from Kevin
+Leonard's source: the name of the volume allocated was changed from PERM01
+to HERC01.</p>
+<h4><a name="10.3">10.3 Allocating <code>SYS1.HASPACE</code>:
+I02ALCSP</a></h4>
+<p>HASP uses a dataset named <code>SYS1.HASPACE</code> to store its work
+areas, as well as SYSIN and SYSOUT data. Since disk space is cheap
+on Hercules, we will use a full 3330 volume for this dataset. This job
+allocated that dataset as 403 cylinders on the pack SPOOL1, which has gone
+unused until this point. It lives in <code>haspjcl/i02alcsp.jcl</code>.<p>
+<h4><a name="10.4">10.4 Loading the source: I03LOAD</a></h4>
+<p>This job loads the HASP source, IBM HASP APARs, the MVT retrofit mods,
+the pre-built HASP utilities, and the XF assembler from tape to the datasets
+allocated on HERC01 by the first job. It will ask for two tapes: the first
+step will call for a tape named <code>HASP4</code>, and the second will call
+for a tape named <code>H4SUPB</code>. These tapes may be found in the files
+<code>tapes/hasp4.aws</code> and <code>tapes/h4supb.aws</code>,
+respectively; they are mounted on the 3420 tape drive in the same way as
+card decks are mounted on the card reader, in the Hercules control
+panel. The job itself is in <code>haspjcl/i03load.jcl</code>.<p>
+<h4><a name="10.5">10.5 Loading the JCL procs: I04PROCS</a></h4>
+<p>Several JCL procs are needed during HASP generation and execution. This
+job loads those to SYS1.PROCLIB. It can be found
+in <code>haspjcl/i04procs.jcl</code>.<p>
+<h4><a name="10.6">10.6 Installing the IOS hooks: I05MACUP</a></h4>
+<p>As mentioned earlier, two hooks are needed within the MVT I/O
+supervisor to give control to HASP when necessary. If the system was
+generated according to the steps listed earlier in this document, this job
+is not necessary, as those hooks have already been added to the system. If
+not, then this job must be run and the modified modules rebuilt,
+as mentioned in the JCL. It's in <code>haspjcl/i05macup.jcl</code>.</p>
+<h4><a name="10.7">10.7 Installing the WTO hook: I06WTO2</a></h4>
+<p>One more hook is used by HASP, although it is not strictly required.
+This hook captures log messages issued by a running job so they can be
+printed in the job log. Unlike the previous job, this step must
+be performed after MVT is built, since the module is assembled from scratch.
+The JCL is in <code>haspjcl/i06wto2.jcl</code>.</p>
+<h4><a name="10.8">10.8 Installing the TSO hooks: I07HTSO</a></h4>
+<p>The TSO CANCEL and STATUS commands need to know about HASP, too. This job
+installs hooks to perform the communication. This one also needs to be done
+after the system is built. The JCL is in
+<code>haspjcl/i06wto2.jcl</code>.</p>
+<h4><a name="10.9">10.9 Applying generation parameters: P01GEN</a></h4>
+<p>Unlike later versions, HASP parameters are set by changing the source
+code and reassembling the program. This first job applies the parameter
+changes that specify how HASP is to run, as well as the IBM APARs. A work
+dataset, <code>SYS1.HASPSRC</code>, is created to hold the modified source
+code so that the original IBM source is kept unmodified. <code>HASPGEN</code>
+is then run to apply the parameter changes to the freshly copied source.
+The JCL is in <code>haspjcl/p01gen.jcl</code>.</p>
+<h4><a name="10.10">10.10 Applying the MVT retrofit: P02RFIT</a></h4>
+<p>The system utility <code>IEBUPDTE</code> is used to apply
+this large collection of changes to the work copy of the HASP source. This
+job should not be modified; if user changes are desired, they should be
+placed in the following job instead. This job is
+in <code>haspjcl/p02rfit.jcl</code>.</p>
+<h4><a name="10.11">10.11 Applying user modifications: P03UMODS</a></h4>
+<p>HASP was one of the most modified programs in any MVT shop, and
+this one is no different. At present, only one mod is in the file, but
+that will almost certainly change in the future. As with the previous job,
+<code>IEBUPDTE</code> is used to modify the working copy. The JCL is
+in <code>haspjcl/p03umods.jcl</code>.</p>
+<h4><a name="10.12">10.12 Assembling HASP: P04Axxxx</a></h4>
+<p>This is a series of 16 jobs. The first deletes and recreates the
+<code>SYS1.HASPOBJ</code> dataset, used to store the object decks for later
+use. The remaining 15 each assemble one HASP module. The tenth job
+also links the <code>HASPOBLD</code> program for use later. All 16
+jobs are contained in the file <code>haspjcl/p04asm.jcl</code>.</p>
+<h4><a name="10.13">10.13 Linking the HASP SVC: P05LSVC</a></h4>
+<p>This job links the just-assembled HASP SVC into the MVT nucleus. Unlike
+the other P-series jobs, this one must only be rerun if the HASP SVC
+source code is changed or if the HASP SVC number is changed. Other
+HASP gen parameters do not affect this program. An IPL is required to make
+the newly-linked SVC active. The JCL is in
+<code>haspjcl/p05lsvc.jcl</code>.</p>
+<h4><a name="10.14">10.14 Linking HASP: P06LHASP</a></h4>
+<p>Like other HASP functions, and unlike other MVT programs, HASP does
+program overlays its own way. This job contains two steps, one
+to build the overlay structure with the HASP utility <code>HASPOBLD</code>,
+and the other to use the normal MVT link editor to link the main
+HASP module. It's in <code>haspjcl/p06lhasp.jcl</code>.</p>
+<h4><a name="10.15">10.15 Bringing up HASP</a></h4>
+<p>Before HASP is started for the first time, the system must be IPLed
+to make the HASP SVC effective. If not, a 0F2 system ABEND will be
+issued when HASP is started.</p>
+<p>One difference in operation between HASP and the standard MVT
+<code>RDR</code> task will be apparent: an end-of-file on the card reader
+no longer causes the reader task to end. Instead, HASP uses that to signal
+the end of the job being read. The intervention required signal that the
+native reader task wants is ignored by HASP. When you bring the system
+down for that first IPL, it is a good time to change the parameter
+of the emulated card reader at 000C from <code>intrq</code> to
+<code>eof</code>. If you do not, you can specify <code>eof</code> when you
+mount the first deck on the card reader, as a parameter, and it will
+remain in effect for subsequent jobs.</p>
+<p>Once the system is IPLed, simply start HASP:<br>
+<code>s hasp</code><br>
+This will produce a request for HASP startup parameters:<br>
+<code>$ hh.mm.ss SPECIFY HASP OPTIONS -- HASP-II VERSION 4.009762</code><br>
+The first time you start HASP, reply, as you would for JES2:<br>
+<code>r <i>nn</i>,format,noreq</code><br>
+This will format the <code>SYS1.HASPACE</code> dataset and make it ready
+for use. On subsequent starts, you can reply:<br>
+<code>r nn,noreq</code><br>
+and HASP will warm start. In either case, HASP will start reader, printer,
+and punch tasks, as specified in the parameters, so you will no longer
+need to start <code>RDR</code>, <code>WTR</code>, and <code>INIT</code>s
+manually.</p>
+<h4><a name="10.16">10.16 Operating HASP</a></h4>
+<p>If you know how to operate JES2, you will have no trouble operating HASP.
+Nearly everything you're familiar with will work, although many functions
+have fewer options and less capability than later versions. If you're not
+familiar with JES2 or HASP, I would suggest looking at commonly available
+JES2 operations documentation for a good start.</p>
+<h4><a name="10.17">10.17 Shutting down HASP</a></h4>
+<p>To shut down HASP, all devices and initiators must be inactive. The
+<code>$DA</code> command will show you what's active and what's not.
+An active reader will becomeinactive once it reaches the end of a job; you
+can feed it the file <code>jcl/eoj.jcl</code> for a quick end.
+Once everything's stopped, and you receive the message:<br>
+<code>$ hh.mm.ss ALL AVAILABLE FUNCTIONS COMPLETE</code><br>
+you can end HASP by issuing:<br>
+<code>$phasp</code><br>
+HASP will terminate, leaving the system idle. You can now issue the
+<code>z eod</code> command to shut down MVT, and exit Hercules.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="iplmvt.html">Previous: IPLing MVT</a>
+<a href="tsotcam.html">Next: Building and installing TSO/TCAM</a>
+</p>
+<hr>
+<address>
+<a href="http://http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

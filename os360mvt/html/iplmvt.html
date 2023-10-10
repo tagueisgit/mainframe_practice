@@ -1,0 +1,180 @@
+<html>
+<head>
+<title>OS/360 on Hercules: IPLing MVT</title>
+<h1>OS/360 on Hercules: IPLing MVT</h1>
+</head>
+<body>
+<hr>
+<h3>9. IPLing MVT</h3>
+<p>Here's the system log from a sample IPL of MVT I did. I'll explain what's
+going on at each step. On the 3270 console, the input area is separate from
+the display area; I'll show the output from each command indented, and the
+input over to the left and in italics.</p>
+<p>After starting Hercules with <code>hercules -f mvt.cnf</code>, connecting
+a tn3270 session (not a regular telnet session, as you did for MFT), and
+telling it to <code>ipl 350</code>, the console comes back with:
+<pre>
+      IEA218I MOD=158, ALTSYS=350 ASSUMED S370
+      IEA101A  SPECIFY SYSTEM PARAMETERS FOR RELEASE 21.8F MVT
+</pre>
+As before, just hit enter. If you see the message
+<pre>
+      IEA100I TIMER IS NOT WORKING
+</pre>
+before the other two, it's possible that your Hercules system is fast enough
+to confuse the timer detection code in MVT. If it's not a lot faster than
+my 500 MHz laptop, stop the system and re-IPL; chances are that it'll go
+away. If not, then the other option is to change the 100000 in the
+FIXGENLB job, step SGIEA2NP, to something larger; I suggest that you
+multiply that number by the difference in speed between your system and
+mine as a starting point. In any case, if that message is issued, you will
+not be able to set the console to roll-delete mode.<br>
+The system may issue the message:
+<pre>
+      IEA135A SPECIFY SYS1.DUMP TAPE UNIT ADDRESS OR NO
+</pre>If it does, enter
+<pre>
+<i>r 00,'no'</i>
+</pre>to turn off the dump function, which will return the message:
+<pre>
+      IEA208I  SYS1.DUMP            FUNCTION INOPERATIVE
+</pre>
+This time, assuming all is working well, things are a bit more verbose:
+<pre>
+      IEE140I SYSTEM CONSOLES                     
+        CONSOLE/ALT  COND AUTH     ID AREA  ROUTCD
+          01E/0C0     H   STCMDS   03       ALL   
+          0C0/01F     M   ALL      01 Z,A   ALL   
+          01F/0C0     A   ALL      02       ALL   
+          01E/0C0     A   NONE     03       NONE  
+     *IEA000A  01F,INT REQ,09,0E00,4000,,,        
+</pre>The available console devices are listed. Since I didn't connect a
+telnet session to the console at 01F, it's complaining; this can be ignored.
+<pre>
+      IEE101A READY                               
+     *00 IEE114A DATE=75.043,CLOCK=20.08.18 - REPLY WITH SET PARAMETERS OR U
+</pre>It's not ready yet this time either, but it's trying. Since Hercules
+has been told to use an epoch 28 years after the normal OS/360 epoch of 1960,
+it thinks that 2003 is really 1975, and finds that acceptable. On a real
+system, you could change the hardware TOD clock at this point, but that has
+no effect on Hercules, which gets the hardware clock value from the host
+system. Before replying to this message, though, there are a couple
+of other things that can be done first to make life a little easier.
+First, we can monitor job names and status, as we did on MFT:
+<pre>
+<i>mn jobnames,t
+mn status</i>
+</pre>Next, we can set the console to roll delete mode. This will make
+status and informational messages roll off the screen, while keeping
+around important messages that need to have something done about them. The
+easy way is to type
+<pre>
+<i>k s</i>
+</pre>and hit ENTER. The command line will be replaced with:
+<pre>
+  K S,DEL=Y,SEG=09,CON=Y,RNUM=19,RTME=046
+</pre>Change it to read:
+<pre>
+<i>  K S,DEL=rd,SEG=19,CON=n,RNUM=19,RTME=001</i>
+</pre>and hit ENTER. The first time you IPL MVT after building the residence volume, you
+need to do:
+<pre>
+<i>r 0,q=(,f)</i>
+</pre>and respond U to the <code>IEF423A SPECIFY JOB QUEUE PARAMETERS</code>
+message. After the first time, you can simply do:
+<pre>
+<i>r 0,u</i>
+      IEE600I REPLY TO 00 IS; U
+      IEE118I SET PARAMETER(S) ACCEPTED
+  00  IEF249I FOLLOWING P/R AND RSV VOLUMES ARE MOUNTED
+      SYSRES ON 150 (RSV-STR)                       
+      WORK01 ON 151 (RSV-PUB)                       
+      HERC01 ON 152 (RSV-PRV)                       
+      SPOOL1 ON 153 (RSV-PRV)                       
+      MVTRES ON 350 (P/R-PRV)                       
+      DLIB01 ON 351 (RSV-PRV)                       
+      WORK02 ON 352 (RSV-PUB)                       
+      IEE037I LOG NOT SUPPORTED.                      
+      IEE351I SMF SYS1.MAN RECORDING NOT BEING USED
+</pre>The PRESRES member has been applied and the volumes listed have been
+marked permanently resident. SMF has been turned off, as was specified
+in the SMFDEFLT member.</p>
+<p>At this point, the IPL is complete. However, the system can't do any
+work yet because it has no reader, writer, or initiators running. Once
+HASP has been built, it will provide those functions, but for now, start
+them manually:
+<pre>
+<i>s init</i>
+    - IEF403I INIT     STARTED    TIME=20.09.35
+      IEF429I INITIATOR 'INIT' WAITING FOR WORK
+</pre>An initiator is started, and waits for work to do. Next, start a
+writer:
+<pre>
+<i>s wtr,00e</i>
+    - IEF403I WTR      STARTED    TIME=20.10.50
+    - IEF236I ALLOC. FOR WTR      00E          
+    - IEF237I 00E   ALLOCATED TO IEFRDER       
+     *01 IEC123D 00E SPECIFY UCS PARAMETER     
+</pre>The system wants to know what character set train is mounted on
+the 1403 printer at 00E. We tell it the PN train, which is the standard one,
+with a full, if upper-case-only, character set:
+<pre>
+<i>r 01,pn</i>
+      IEE600I REPLY TO 01 IS; PN
+</pre>This is the answer it's looking for, and now it, too, waits for
+work.<br>
+Note that, unlike MFT, MVT uses different reply identifiers for each
+operator request. You need to specify the number in your reply so the system
+knows what you're replying to.<br>
+Finally, start a reader:
+<pre>
+<i>s rdr,00c</i>
+      IEF403I RDR      STARTED    TIME=20.12.14
+      IEF236I ALLOC. FOR RDR      00C          
+      IEF237I 00C   ALLOCATED TO IEFRDER       
+     *IEA000A  00C,INT REQ,02,0E00,1000,,,RDR  
+</pre>
+The IEA000A message for 00C is not an error, really: it means the reader has
+run out of cards to read and is asking for more. You can ignore this one.
+The system is now ready to do some real work. Let's see what's active:
+<pre>
+<i>d a</i>
+   IEE102I 20.57.19 ACTIVE DISPLAY      FRAME LAST         F      E     1A
+   STRADDR ENDADDR SQA   R  SUBT  NAME1     NAME2     NAME3               
+   16322K  00000K  02280    01    MASTER SCHEDULER                        
+   16258K  16322K  00328    00    WTR       00E                           
+   00000K  00000K  00504    00    INIT                                    
+   16194K  16258K  00768    00    RDR       00C                           
+</pre>This display is shown in a display area at the bottom of the output
+area of the console; other lines will move up to make room. The part that
+says <code>FRAME LAST</code> means that no more output is waiting to be
+displayed; if it says <code>FRAME 1</code> (or some other number), you can
+page through the display by entering <code>k d,f</code>. The display is
+erased by entering <code>k e,d</code>.<br>
+From the top of the system's 16 MB of memory down, we have the master
+scheduler, the <code>WTR</code> task to print on the system printer, and
+the <code>RDR</code> task to read cards from the card reader. There's an
+initiator at the bottom of memory, waiting to have something to do.</p>
+<p>The system considers the intervention required messages that mean the
+card reader and alternate console aren't ready to me ones that
+it can't delete. To remove them manually, once they scroll to the top
+of the screen, enter
+<pre>
+<i>k e,1</i>
+</pre>The topmost line will be rolled off, whether the system would have
+deleted it or not.</p>
+<p>At this point, jobs may be submitted and executed as they were on
+MFT.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="poststg2.html">Previous: Final MVT setup</a>
+<a href="hasp.html">Next: Building and installing HASP</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

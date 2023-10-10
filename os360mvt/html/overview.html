@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Overview</title>
+<h1>OS/360 on Hercules: Overview</h1>
+</head>
+<body>
+<hr>
+<h3>1. Overview</h3>
+<h4><a name="1.1">1.1 What is Hercules?</a></h4>
+<p>Hercules is an emulator for the IBM System/370,
+ESA/390, and z/Architecture mainframes. The goal of the project is
+to build an emulator that runs on Linux, Windows, and any other Unix-style
+OS, capable of running any IBM operating system and program. Check out the
+<a href="http://www.conmicro.cx/hercules">Hercules home
+page</a> for all the details, and join the
+<a href="http://groups.yahoo.com/group/hercules-390">Hercules mailing
+list</a> at Yahoo! Groups to get in on the discussion of the system. There's
+also a group, <a 
+href="http://groups.yahoo.com/group/hercules-os360">hercules-os360</a>,
+dedicated to discussion of OS/360 on Hercules. Updates to this document
+will be announced there.</p>
+<h4><a name="1.2">1.2 What is OS/360?</a></h4>
+<p>OS/360 is the operating system IBM intended all along to be what people
+ran on their System/360 mainframe line. It's a famous case of software
+taking much, much longer to deliver than anyone had planned or hoped, and
+was quite buggy when it was first released. Fred Brooks was a manager at IBM
+on the OS/360 project, and his classic work on software engineering, <i>The
+Mythical Man-Month</i>, is based on his experiences with that project.<p>
+<p>OS/360 came in three flavors: PCP, MFT, and MVT. PCP (Primary Control
+Program) was the simplest, capable of only running one task at a time. MFT
+(Multiprogramming with a Fixed number of Tasks) could, as the name implies,
+run several things simultaneously, but the number was fixed by a limit set
+when the system was built. MVT (Multiprogramming with a Variable number of
+Tasks) removed the build-time restriction on how much could be run at once;
+instead, the limit was how much could be squeezed into the host computer's
+memory and CPU resources. MVT is the most capable of the three flavors, and
+the one we'll be getting to run.</p>
+<p>OS/360 lives on even today, greatly enhanced and improved, as z/OS.
+Over the years, it has been transformed to the point that very little to
+none of the actual OS/360 code still is used, but the basic design
+is still very much intact, and many of the features of MVT will be readily
+recognizable to an MVS, OS/390, or z/OS systems programmer. This
+is especially true of the HASP job control and spooling system, which
+is the forerunner of today's JES2.</p>
+<h4><a name="1.3">1.3 What are we trying to accomplish?</a></h4>
+<p>The goal here is to have a running OS/360 MVT system, with as many of the
+features as can be made to work. In particular, TSO (Time Sharing Option,
+the interactive terminal subsystem), and the FORTRAN, PL/1, COBOL, ALGOL,
+and RPG compilers are included. Since MVT doesn't have virtual storage, and
+since Hercules is a software-based emulator, it won't handle a really huge
+workload, but it's definitely adequate for systems hacking and
+demonstration.</p>
+<h4><a name="1.4">1.4 Overview of the process</a></h4>
+<p>Getting from the raw source materials to a running system is
+straightforward, but somewhat involved. The Hercules emulator is
+installed. A small MFT system, referred to as the "driving system", is
+constructed, and used to build the actual MVT "target system". This is done
+in two steps: stage 1, which takes a machine-readable description of the
+target system's hardware and software and builds the jobs necessary to
+construct it, and stage 2, which uses the output of stage 1 to do the
+actual work. After stage 2 is complete, a small amount of final preparation
+is done, and the target system is IPLed and run. HASP and TSO/TCAM are then
+loaded and generated. At this point, the system is ready to do work.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="getstarted.html">Next: Getting Started</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 21 February 2003
+</body>
+</html>

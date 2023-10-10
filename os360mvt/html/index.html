@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>Introduction to Generating and Running OS/360 on Hercules</title>
+<h1>Introduction to Generating and Running OS/360 on Hercules</h1>
+</head>
+<body>
+<p>This is an introduction to getting IBM's OS/360 operating system loaded
+and running on the <a href="http://www.conmicro.cx/hercules"> Hercules</a>
+emulator for the System/370, ESA/390, and z/Architecture systems.
+It assumes you have some familiarity with the 370, and with OS; in
+particular, you need to have some understanding of JCL, and of
+OS/360 (or later versions, like MVS or OS/390) usage and operation. It
+does not purport to be an introduction to the world of the 370.</p>
+<p>Last updated 29 April 2005. See the <a href="updates.html">Updates</a>
+page for the details.
+</p>
+<hr>
+<h3><a href="overview.html">1. Overview</a></h3>
+<h4><a href="overview.html#1.1">1.1 What is Hercules?</a></h4>
+<h4><a href="overview.html#1.2">1.2 What is OS/360?</a></h4>
+<h4><a href="overview.html#1.3">1.3 What are we trying to accomplish?</a></h4>
+<h4><a href="overview.html#1.4">1.4 Overview of the process</a></h4>
+<h3><a href="getstarted.html">2. Getting started</a></h3>
+<h4><a href="getstarted.html#2.1">2.1 The host Linux system</a></h4>
+<h4><a href="getstarted.html#2.2">2.2 Hercules</a></h4>
+<h4><a href="getstarted.html#2.3">2.3 The OS/360 distribution</a></h4>
+<h4><a href="getstarted.html#2.4">2.4 JCL and control files</a></h4>
+<h4><a href="getstarted.html#2.5">2.5 Patience!</a></h4>
+<h3><a href="blddrv.html">3. Building the driving system</a></h3>
+<h4><a href="blddrv.html#3.1">3.1 Installing Hercules</a></h4>
+<h4><a href="blddrv.html#3.2">3.2 Building the MFT IPL volume</a></h4>
+<h3><a href="bldtgt.html">4. Preparing to build MVT</a></h3>
+<h4><a href="bldtgt.html#4.1">4.1 Building the MVT DLIB volumes</a></h4>
+<h4><a href="bldtgt.html#4.2">4.2 Creating the MVT target and work
+volumes</a></h4>
+<h3><a href="prelim.html">5. Getting ready for stage 1</a></h3>
+<h4><a href="prelim.html#5.1">5.1 General information about running
+MFT</a></h4>
+<h4><a href="prelim.html#5.2">5.2 IPLing the driving system</a></h4>
+<h4><a href="prelim.html#5.3">5.3 Cataloging work datasets: CTLGWRK</a></h4>
+<h4><a href="prelim.html#5.5">5.4 Cataloging DLIBs: CTLG2314</a></h4>
+<h4><a href="prelim.html#5.6">5.5 Selecting the right IEAANIP:
+FIXNIP</a></h4>
+<h4><a href="prelim.html#5.6">5.6 Fixing GENLIB macros: FIXGENLB</a></h4>
+<h4><a href="prelim.html#5.7">5.7 Installing hooks for HASP:
+HASPHOOK</a></h4>
+<h3><a href="stage1.html">6. Running the stage 1 sysgen</a></h3>
+<h4><a href="stage1.html#6.1">6.1 A guided tour of STAGE1</a></h4>
+<h4><a href="stage1.html#6.2">6.2 Running STAGE1</a></h4>
+<h3><a href="stage2.html">7. Running the stage 2 sysgen</a></h3>
+<h4><a href="stage2.html#7.1">7.1 A guided tour of the stage 2 deck</a></h4>
+<h4><a href="stage2.html#7.3">7.2 Running the stage 2 deck</a></h4>
+<h4><a href="stage2.html#7.4">7.3 Stage 2 job error handling</a></h4>
+<h3><a href="poststg2.html">8. Final MVT setup</a></h3>
+<h4><a href="poststg2.html#8.1">8.1 MVT setup: MVTSETUP</a></h4>
+<h4><a href="poststg2.html#8.2">8.2 Shutting down the driving
+system</a></h4>
+<h3><a href="iplmvt.html">9. IPLing MVT</a></h3>
+<h3><a href="hasp.html">10. Building and installing HASP</a></h3>
+<h4><a href="hasp.html#10.1">10.1 Overview</a></h4>
+<h4><a href="hasp.html#10.2">10.2 Allocating HASP datasets: I01ALCIN</a></h4>
+<h4><a href="hasp.html#10.3">10.3 Allocating <code>SYS1.HASPACE</code>:
+I02ALCSP</a></h4>
+<h4><a href="hasp.html#10.4">10.4 Loading the source: I03LOAD</a></h4>
+<h4><a href="hasp.html#10.5">10.5 Loading the JCL procs: I04PROCS</a></h4>
+<h4><a href="hasp.html#10.6">10.6 Installing the IOS hooks: I05MACUP</a></h4>
+<h4><a href="hasp.html#10.7">10.7 Installing the WTO hook: I06WTO2</a></h4>
+<h4><a href="hasp.html#10.8">10.8 Installing the TSO hooks: I07HTSO</a></h4>
+<h4><a href="hasp.html#10.9">10.9 Applying generation parameters:
+P01GEN</a></h4>
+<h4><a href="hasp.html#10.10">10.10 Applying the MVT retrofit: P02RFIT</a></h4>
+<h4><a href="hasp.html#10.11">10.11 Applying user modifications:
+P03UMODS</a></h4>
+<h4><a href="hasp.html#10.12">10.12 Assembling HASP: P04ASMnn</a></h4>
+<h4><a href="hasp.html#10.13">10.13 Linking the HASP SVC: P05LSVC</a></h4>
+<h4><a href="hasp.html#10.14">10.14 Linking HASP: P06LHASP</a></h4>
+<h4><a href="hasp.html#10.15">10.15 Bringing up HASP</a></h4>
+<h4><a href="hasp.html#10.16">10.16 Operating HASP</a></h4>
+<h4><a href="hasp.html#10.17">10.17 Shutting down HASP</a></h4>
+<h3><a href="tsotcam.html">11. Building and installing TSO/TCAM</a></h3>
+<h4><a href="tsotcam.html#11.1">11.1 Overview</a></h4>
+<h4><a href="tsotcam.html#11.2">11.2 TCAM and TSO JCL: TCAMPRCS</a></h4>
+<h4><a href="tsotcam.html#11.3">11.3 TSO parameters: TSOSETUP</a></h4>
+<h4><a href="tsotcam.html#11.4">11.4 TCAM stage 1: TCAMSTG1</a></h4>
+<h4><a href="tsotcam.html#11.5">11.5 TCAM stage 2: TCAMSTG2</a></h4>
+<h4><a href="tsotcam.html#11.6">11.6 Starting TCAM and TSO</a></h4>
+<h4><a href="tsotcam.html#11.7">11.7 Logging on to TSO</a></h4>
+<h4><a href="tsotcam.html#11.8">11.8 Shutting down TSO and TCAM</a></h4>
+<h3><a href="whatsnext.html">12. What's next?</a></h3>
+<h3><a href="credits.html">13. Acknowledgments</a></h3>
+<h3><a href="updates.html">14. Updates</a></h3>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

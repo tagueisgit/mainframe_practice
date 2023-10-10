@@ -1,0 +1,33 @@
+2003/02/10 Index of HASP install jobs and files
+
+
+**** Install jobs (run once) **********************************
+I01ALCIN  Allocate HASP installation disk data sets.
+I02ALCSP  Allocate SYS1.HASPACE data set.
+I03LOAD   Load HASP distribution material from HASP4 tape;
+          utilities, OS/VS XF assembler, fixes and MVT refit
+          mods from H4SUPA tape.
+I04PROCS  Add HASP procedures to SYS1.PROCLIB.
+I05IOSM   Update IOS macros IECXCP and IECIOS in SYS1.MODGEN.
+I06WTO2   Add HASP WTO exit 2 hook to SVC 35.
+
+**** Run sysgen or iogen here to add pseudodevices and add ****
+**** HASP support to IOS **************************************
+SAMPSTG1  Sample stage 1 statements for HASP support.
+
+**** Postinstall jobs (rerun to customize HASP) ***************
+P01GEN    Create customized SYS1.HASPSRC with IBM
+          maintenance installed.
+P02RFIT   Update customized SYS1.HASPSRC with
+          refit mods for MVT.
+P03UMODS  Update customized SYS1.HASPSRC with
+          user modifications.
+P04ASM    Assemble customized HASP source into
+          SYS1.HASPOBJ.
+P05LSVC   Install HASP SVC into nucleus.
+P06LHASP  Link HASP load module into SYS1.LINKLIB.
+
+
+**** Other files **********************************************
+SAMPPARM  A sample set of HASPGEN parms with the default options
+          as supplied by IBM.

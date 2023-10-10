@@ -1,0 +1,68 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Running the stage 2 sysgen</title>
+<h1>OS/360 on Hercules: Running the stage 2 sysgen</h1>
+</head>
+<body>
+<hr>
+<h3>7. Running the stage 2 sysgen</h3>
+<h4><a name="7.1">7.1 A guided tour of the stage 2 deck</a></h4>
+<p>The stage 2 deck is made up of eight groups of jobs:
+<ul>
+<li>Jobs 1 through 48 assemble system components that need to be configured
+to match the sysgen specifications.</li>
+<li>Jobs 49 through 62 link edit and copy TSO and TCAM to the target
+system.</li>
+<li>Job 63 is the first of three really big <cods>IEBCOPY</code> jobs to
+populate the target system; this one populates
+<code>SYS1.MACLIB</code>. Job 64 renames the dataset to its final name.</li>
+<li>Jobs 65 through 101 link edit the operating system and support
+programs.</li>
+<li>Job 102 is the second big <code>IEBCOPY</code>; this one populates
+<code>SYS1.LINKLIB</code>, <code>SYS1.SVCLIB</code>, and
+<code>SYS1.TELCMLIB</code>. This is the job that will most likely blow up if
+any of those datasets are underallocated.</li>
+<li>Jobs 103 through 119 link edit the compilers, assembler, libraries, and
+the link editor itself.</li>
+<li>Job 120 is the third big <code>IEBCOPY</code>; it adds the compilers,
+assembler, and link editor to <code>SYS1.LINKLIB</code>, and populates the
+language libraries, <code>SYS1.PARMLIB</code>, and
+<code>SYS1.PROCLIB</code>. If you've run successfully through this job, then
+you're basically set, as the last group is not likely to fail.</li>
+<li>Jobs 121 through 124 perform final cleanup. Job 121 runs
+<code>IEHIOSUP</code> against the generated <code>SYS1.SVCLIB</code>; job
+122 creates two error recording datasets; job 123 adds them to the catalog;
+and job 124 renames the generated datasets from their temporary names to the
+actual names they'll use during execution of the target MVT system.</li>
+</ul>
+These job numbers will change as the stage 1 input changes, but all eight
+groups of jobs will be present in a full gen.</p>
+<h4><a name="7.2">7.2 Running the stage 2 deck</a></h4>
+<p>The stage 2 jobstream may be run in the same manner as the other jobs.
+You'll probably want to copy it from <code>pch00d.txt</code> to
+<code>stage2.jcl</code> first, just to keep things from getting overwritten
+when you least expect it. I suggest leaving the P1 initiator running while
+you read the deck in; this will result in the jobs being read in one at a
+time, then executed before the next one is read in. This process will take
+several minutes.</p>
+<h4><a name="7.3">7.3 Stage 2 job error handling</a></h4>
+<p>None of these jobs are expected to generate complaints. The
+<code>ZEND</code> step isn't executed if the associated job ends with
+condition code 0, and is if the condition code is greater than 0 (or 4 for
+linkedit jobs). Since the <code>ZMSG</code> program referenced in that step
+doesn't actually exist, it gets an S806 ABEND. This ABEND isn't itself a
+problem, but it indicates something else that might be. If you receive one
+of these ABENDs, look over the job's output to determine the reason.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="stage1.html">Previous: Running the stage 1 sysgen</a>
+<a href="poststg2.html">Next: Final MVT setup</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 12 February 2003
+</body>
+</html>

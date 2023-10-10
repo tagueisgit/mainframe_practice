@@ -1,0 +1,92 @@
+### Instructions for installing, configuring, and running Hercules and Hercules Studio on Debian 12
+
+Set up:
+- echo "export 'HERCULES_CNF="/usr/share/doc/hercules/examples/hercules.cnf"' >>~/.bashrc
+- confirm ~/.bashrc is sourced by ~/.bash_profile, if ~/.bash_profile exists
+- install GNUCOBOL: "sudo apt-get install gnucobol"
+- configure emacs functions for cobol-compile and cobol-run:
+;; =============================================================================
+;; Basic Configuration
+;; =============================================================================
+
+;; Open Emacs in full screen mode
+(set-frame-parameter nil 'fullscreen 'fullboth)
+
+;; Set theme
+(load-theme 'misterioso t)
+
+;; COBOL support
+(defun cobol-compile ()
+  "Compile the current COBOL file using cobc."
+  (interactive)
+  (compile (concat "cobc -x " (buffer-file-name))))
+
+(defun cobol-run ()
+  "Execute the current COBOL program."
+  (interactive)
+  (let ((executable-path (buffer-file-name)))
+    (compile executable-path)))
+
+(use-package cobol-mode
+  :ensure t
+  :mode "\\.cob\\'"
+  :bind
+  (:map cobol-mode-map
+        ("C-c C-c" . cobol-compile)
+        ("C-c C-r" . cobol-run)))
+
+;; =============================================================================
+;; End Configuration
+;; =============================================================================
+
+AUTOMATICALLY START HERCULES
+- vi /etc/systemd/system/hercules.service
+
+[Unit]
+Description=Hercules Emulator
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/hercules -f $HERCULES_CNF
+Restart=on-failure
+User=YOUR_USERNAME
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl enable hercules
+sudo systemctl start hercules
+
+Configure Hercules Studio to start at boot
+- vi /etc/systemd/system/hercules-studio.service
+
+[Unit]
+Description=Hercules Studio GUI
+After=hercules.service
+Requires=hercules.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/HerculesStudio
+User=btague
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/btague/.Xauthority
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl enable hercules-studio
+sudo systemctl start hercules-studio
+
+Install Mainframe OS
+- cd /usr/share/hercules
+- curl -O http://www.ibiblio.org/jmaynard/asp.zip
+- unzip asp.zip
+
+Execution:
+- cd /usr/share/hercules/asp
+- sudo HerculesStudio -f conf/asp.conf
+

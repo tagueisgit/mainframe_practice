@@ -1,0 +1,211 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Getting ready for stage 1</title>
+<h1>OS/360 on Hercules: Getting ready for stage 1</h1>
+</head>
+<body>
+<hr>
+<h3>5. Getting ready for stage 1</h3>
+<h4><a name="5.1">5.1 General information about running MFT</a></h4>
+<p>We're finished with the work that can be done outside of the driving
+system. From here on, everything will be dome from the driving system by
+running jobs. Some basics of running MFT:
+<ul>
+<li>On the pregenerated system, you can only run two things at a time. The
+tasks are designated as P0 and P1. If something's running in P0 and you try
+to start something else, nothing will appear to happen. Nothing's broken,
+though, and the second thing to be started will run when the first one's
+finished.</li>
+<li>Jobs are read into the system from a virtual card reader, with a task
+called <code>RDR</code>. In the supplied config files, the reader is defined
+at address 00C. Output is written to a printer by a writer task called
+<code>WTR</code>; the printer is defined at address 00E, and printed output
+will show up in the file <code>prt00e.txt</code> as it's written. Cards
+punched by the virtual card punch will appear in the file
+<code>pch00d.txt</code>.</li>
+<li>Basically, to run each job, you do:<br>
+<code>devinit 00c</code> <i>filename</i> (in the command line control panel,
+or)<br> <code>n</code> <i>deviceID filename</i> (in the semi-graphical
+control panel)<br>.
+This command is issued in the Hercules control panel to point the virtual
+card reader at the file you need to run. The reader automagically
+detects if the input file is ASCII or EBCDIC, and does any translation
+that might be needed.</li>
+<li>You will see messages of the form:<br>
+<code>&nbsp;IEF234E R </code><i>addr</i><code>,</code><i>volser</i><code>,RDR
+P01<br>
+*IEF233A M </code><i>addr</i><code>,SCRTCH,,RDR,P1  P01</code><br>
+This is a mount needed message. On a real system, the operator would see
+this, physically put the appropriate disk pack in the drive called out in
+the message, then press a button on the drive to cause an interrupt and tell
+OS/360 that the volume is now available. While Hercules disk volumes are
+interchangeable, there's no need to do that, since there are enough drives
+to go around, so instead, we can avoid the necessity of doing it more than
+once on a given drive by:
+<ul>
+<li><code>m
+</code><i>addr</i><code>,vol=(sl,</code><i>volser</i><code>),use=private</code><br>
+This command to MFT tells the operating system to leave the volume named
+<i>volser</i> on the drive with the address <i>addr</i> for the life of the
+current execution, or until the operator makes it available again by
+unmounting the volume. If the <i>volser</i> is <code>WORK</code><i>xx</i>,
+use <code>public</code> instead of <code>private</code> in the command.</li>
+<li><code>i</code> <i>addr</i>(in the command line control panel, or)<br>
+<code>u</code> <i>deviceID</i>(in the semi-graphical control panel)<br>
+This command in the Hercules console window simulates the interrupt button.
+Until you issue it, MFT will assume the volume is not yet available and not
+do anything.</li>
+</ul>
+<p>If your system is sitting there, not doing anything, it's probably
+waiting for a reply to a mount request. See the preceding paragraph.
+</ul></p>
+<h4><a name="5.2">5.2 IPLing the driving system</a></h4>
+<p>To start MFT:
+<ul>
+<li><code>hercules -f gen.cnf</code><br>
+This command, at a Linux or Windows command prompt, or in a Mac OS X
+Terminal window, starts the Hercules emulator and tells it the list of
+devices to use. This window is now the Hercules control panel. You'll see a
+list of available disk devices, and then a message:<br>
+<code>HHCTE003I Waiting for console connection on port 3270</code></li>
+<li>Now, connect a telnet client in another window or virtual console - or
+another computer, if you like - to the system console. From Linux, do:<br>
+<code>telnet localhost 3270</code><br>
+On Windows 2000 or XP, the standard telnet client has problems; use another
+program, such as TeraTerm Pro or putty. (If you're connecting from another
+system, the idea is to connect a telnet client to port 3270 on the host
+system you're running Hercules on.) You'll be greeted with a banner telling
+you that you've connected to Hercules, along with the version and console
+address.<br>
+The supplied config file (and the one for the running MVT system, too) are
+set to use a time zone offset of -6 hours, to change a system GMT clock to
+US Central Standard Time. If you run your system clock on local time, or
+don't live in the central US, you'll want to change this to reflect your
+time zone. MFT doesn't use the TOD clock, so that's not important now, but
+MVT does, and things will look funny if you don't change it.</li>
+<li><code>ipl 150</code> (command line control panel, or)<br>
+<code>l</code> <i>deviceID</i> (semi-graphical control panel)<br>
+in the Hercules control panel. Load and start (IPL, for Initial Program
+Load) the operating system. There will be a lot of activity, messages flying
+by, none of which you really care about (they're useful for debugging).
+Eventually, you'll be greeted with:<br>
+<code>IEA218I MOD=50 ASSUMED S360<br>
+IEA101A  SPECIFY SYSTEM PARAMETERS FOR RELEASE 21.0  MFT</code><br>
+on the MFT console (the telnet session). Except for the commands noted above
+for setting up the card reader and disk drives, all other commands will be
+issued at this session.</li>
+<li><i>(just hit enter)</i><br>
+This tells MFT that you don't want to change any of the basic system
+parameters. You'll see, next:<br>
+<code>IEA217I SEREP INTERFACE ESTABLISHED<br>
+*00 IEE801D CHANGE PARTITIONS- REPLY YES/NO (,LIST)</code><br>
+The system wants to know if you want to change the default partition
+sizes.</li>
+<li><code>r 00,yes</code><br>
+You do want to change them, mainly because the default size for the P0
+partition is small enough that you can't do any useful work there. The
+system will acknowledge your request with:<br>
+<code>&nbsp;IEE866I DEFINE COMMAND BEING PROCESSED<br>
+*00 IEE802A ENTER DEFINITION</code></li>
+<li><code>r 00,p0=(a,512k),p1=(a,512k),end</code><br>
+This defines two partitions (the maximum allowed in the starter system),
+both with 512K of memory maximum. This isn't as restrictive as it sounds. In
+the era of OS/360, a single machine with 512K of memory was huge. (Your
+virtual system, a 370/158, has 2 MB of memory.) Most programs were written
+to run comfortably in much smaller regions of memory. A 128K partition was
+sufficient to run nearly anything except the ANS COBOL or FORTRAN H
+compilers.<br>
+The system will respond with a couple of messages about defining things,
+then:<br>
+<code>&nbsp;IEE101A READY</code><br>
+It's lying: it's not ready to do work yet, but it's not far from it.</li>
+<li><code>t date=</code><i>yy.ddd</i><code>,q=(,f)</code><br>
+This command tells MFT what today's date is. Since it dates from the late
+1960s, it's not anything resembling Y2K compliant; you'll have to pick a
+date in the past. I recommend the correct current day number, and using the
+year 1975 instead of the year 2003; this makes the dates work right,
+including the right day of the week and the fact that it's a leap year. The
+<code>q=(,f)</code> is only needed the first time you IPL the system after
+building the system IPL volume; it tells the system to initialize the
+dataset used for job control. If that's specified, you'll get:<br>
+<code>*00 IEF423A SPECIFY JOB QUEUE PARAMETERS</code><br>
+Reply to this with:<br>
+<code>r 00,u</code><br>
+to accept the defaults. The system will run for about 30 seconds, and
+eventually come to a wait state when it's done.</li>
+<li><code>mn jobnames,t<br>
+mn status</code><br>
+These two commands will make the system produce progress messages on the
+console as jobs start and finish, and set up datasets for use. They will
+produce no output themselves.</li>
+<li><code>s wtr.p0,00e</code><br>
+This starts the WTR task in P0. You'll see a couple of progress messages,
+and then:<br>
+<code>&nbsp;IEF868I 00E WTR WAITING FOR WORK P00</code><br>
+The writer is ready to do its job. It'll sit there quietly in the background
+until you stop it. There's no real need to stop it.</li>
+<li><code>s init.p1,,,a</code><br>
+This tells MFT to run available jobs submitted with <code>CLASS=A</code> in
+P1. It doesn't actually start anything, but rather allows other things to
+start themselves. It will produce no messages by itself.</li>
+<li><code>s rdr.p1,00c</code><br>
+This tells MFT to start the RDR process to read in the cards. The RDR task
+will start, produce a mount request (which you need to reply to as
+described above), then put up an I/O error message. It's complaining that
+it has no cards to read. This is normal. When you do the <code>devinit</code>
+or <code>n</code> command, the reader will see that it has cards to read and
+read them.</li>
+</ul>
+MFT is now ready to do work.</p>
+<h4><a name="5.3">5.3 Cataloging work datasets: CTLGWRK</a></h4>
+<p>The first job that you'll need to run is CTLGWRK. It has two steps:
+<ul>
+<li><code>CTLGWRK</code>: This step catalogs the work datasets so stage 2
+can find them.</li>
+<li><code>MAKECTLG</code>: This step creates and initializes the system
+catalog on the target MVT system.</li>
+</ul>
+The job is in <code>jcl/ctlgwrk.jcl</code>.</p>
+<h4><a name="5.4">5.4 Cataloging DLIBs: CTLG3330</a></h4>
+<p>This job has just one step. It adds the DLIB datasets to the driving
+system's master catalog. The job is in <code>jcl/ctlg3330.jcl</code>.</p>
+<h4><a name="5.5">5.5 Selecting the right IEAANIP: FIXNIP</a></h4>
+<p>This job corrects a problem in the <code>SYS1.MODGEN2</code> dataset on
+the CD: As supplied, it has a modified <code>IEAANIP</code> macro, which
+builds the Nucleus Initialization Program. The modified code will not build
+with the rest of the system on the CD. Forutnately, the original version is
+still there; this job switches it in place of the unusable one. The job is
+in <code>jcl/fixnip.jcl</code>.</p>
+<h4><a name="5.6">5.6 Fixing GENLIB macros: FIXGENLB</a></h4>
+<p>The supplied <code>SYS1.GENLIB</code> has several modifications from the
+standard version. While most of them are harmless, and several are actually
+good, they assume an environment that doesn't apply completely here. This
+job changes the source macros to eliminate the problems, and the need to
+manually edit the stage 2 deck once generated. The job is in
+<code>jcl/fixgenlb.jcl</code>. It makes all possible updates in place on
+<code>SYS1.GENLIB</code>, but two changes require a new member, so the
+dataset is allocated with extra space to accomodate that by
+<code>makedasd</code>.</p>
+<h4><a name="5.7">5.7 Installing hooks for HASP: HASPHOOK</a></h4>
+<p>HASP is an add-on package, not part of OS/360 proper. It was developed
+independently at the IBM Federal Systems Division in Houston. (Hence the
+name, Houston Automatic Spooling Package.) As such, it needed a few
+additions to the standard OS/360 programs. Most of those additions are
+already in place, but two others need to be added to make the OS/360 I/O
+subsystem call HASP at critical points in processing. Three system
+generation macros also need to be replaced. (They cannot be updated, since
+they do not have complete line numbering.) This job, in
+<code>jcl/hasphook.jcl</code>, adds those hooks.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="bldtgt.html">Previous: Preparing to build MVT</a>
+<a href="stage1.html">Next: Running the stage 1 sysgen</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

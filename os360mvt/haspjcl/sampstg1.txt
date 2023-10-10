@@ -1,0 +1,47 @@
+*====================================================================*
+*                                                                    *
+*          HASP-related definitions.                                 *
+*                                                                    *
+*          HASP requires all of the following to be                  *
+*          defined in the OS stage 1:                                *
+*                                                                    *
+*          --  IODEVICE macros for HASP pseudo devices.              *
+*          --  UNITNAME macros to define esoterics for               *
+*              the pseudo devices.                                   *
+*          --  A type 1 SVC.                                         *
+*                                                                    *
+*          IODEVICE UNIT values are:                                 *
+*                                                                    *
+*          --  HASP-2540R   Pseudo readers                           *
+*          --  HASP-1403    Pseudo printers                          *
+*          --  HASP-2540P   Pseudo punches                           *
+*          --  HASP-2520    Internal readers                         *
+*                                                                    *
+*          Esoterics required by HASP are:                           *
+*                                                                    *
+*          --  R            Pseudo readers                           *
+*          --  A            Pseudo printers                          *
+*          --  B            Pseudo punches                           *
+*          --  INTRDR       Internal readers                         *
+*                                                                    *
+*          One HASP-2540R is required for HOSRDR (specified          *
+*          by the HASPGEN paramenter &RDR), and one HASP-1403        *
+*          is required for HASPWTR to retrieve SMBs (specified       *
+*          by the HASPGEN paramenter &WTR).  These pseudo            *
+*          devices should not be included in the R and A             *
+*          esoterics.                                                *
+*                                                                    *
+*====================================================================*
+               SPACE 1
+    CHANNEL   ADDRESS=7,TYPE=BLKMPXR
+    PRINT     NOGEN
+    IODEVICE  ADDRESS=(700,12),UNIT=HASP-2540R   Pseudo readers
+    IODEVICE  ADDRESS=(720,32),UNIT=HASP-1403    Pseudo printers
+    IODEVICE  ADDRESS=(770,8),UNIT=HASP-2540P    Pseudo punches
+    IODEVICE  ADDRESS=(780,6),UNIT=HASP-2520     Internal readers
+    PRINT     GEN
+    UNITNAME  UNIT=((701,11)),NAME=R             Pseudo readers
+    UNITNAME  UNIT=((721,31)),NAME=A             Pseudo printers
+    UNITNAME  UNIT=((770,8)),NAME=B              Pseudo punches
+    UNITNAME  UNIT=((780,6)),NAME=INTRDR         Internal readers
+    SVCTABLE  SVC-220-T1-S0                      HASP SVC

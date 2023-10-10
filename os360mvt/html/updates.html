@@ -1,0 +1,45 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Updates</title>
+<h1>OS/360 on Hercules: Updates</h1>
+</head>
+<body>
+<hr>
+<h3>14. Updates</h3>
+<p>This is a list of updates to the documentation, scripts, and JCL for
+generating MVT on Hercules. It begins with the complete overhaul done in
+February 2003 for production of the turnkey MVT system.</p>
+<p>29 April 2005: Aron Eisenpress found an original copy of
+<code>SYS1.FORTLIB</code> floating around his system. It's now supplied.
+I've also included Kevin Leonard's latest HASP installation kit, which
+includes support for TSO functions.
+<p>28 April 2005: Kevin Leonard and Gregg Berg finally tracked down
+the HASP S200 ABEND. The <code>HASPHOOK</code> job has been corrected to
+prevent this in the future. SMF must be enabled, as well; I'll post updated
+SMF parms as soon as I get some time.
+<p>23 Feb 2003: Changed the MVT system configuration from 16 MB of core
+to 8 MB. TSO logons get ABENDs if more than 8 MB is specified.
+Also removed the note about HASP not working; this was not fixed by
+lowering the amount of core, but I cannot say why it started working.</p>
+<p>21 Feb 2003: HASP does not work yet in this system,
+although others have succeeded in getting it running. SMF was added, but
+turned off, in order to fix one HASP problem.</p>
+<p>10 Feb 2003: Completely overhauled. Many changes have happened
+to Hercules since this document was last revised in February 2000, and a
+rewrite was long overdue. In addition, many more resources have become
+available, including HASP, TSO/TCAM, and several classic modifications
+tapes. The stage 1 gen has been changed a bit, and configuration files
+written to work with previous versions of this document will
+need revision.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="credits.html">Previous: Acknowledgments</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

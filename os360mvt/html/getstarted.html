@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Getting started</title>
+<h1>OS/360 on Hercules: Getting started</h1>
+</head>
+<body>
+<hr>
+<h3>2. Getting started</h3>
+<h4><a name="2.1">2.1 The host system</a></h4>
+<p>Hercules runs on most current Linux distributions, Mac OS X, other
+Unix-style systems, and Windows 98 and above. It will make use of multiple
+host CPUs if present, and benefits greatly from having enough main memory
+to allocate all of the emulated system's cenral storage plus approximately
+128 MB for the host OS to use. Hercules can emulate multiple CPUs, but that
+function will not be used in the generated MVT system, mainly because
+nobody has tested it to see if it works.</p>
+<h4><a name="2.2">2.2 Hercules</a></h4>
+<p>You'll need the current revision of Hercules. Download it from the <a
+href="http://www.conmicro.cx/hercules">Hercules home page</a>. You can
+install the prebuilt binaries, if they're available for your host system;
+if not, you'll get to build it yourself.</p>
+<p>The current version as I write this is 3.02. Earlier 3.x and 2.x versions
+will probably work, although 2.16.x is known to have problems with
+MVT. 1.x versions will not work with the configuration files shipped as
+part of this package.</p>
+<h4><a name="2.3">2.3 The OS/360 distribution</a></h4>
+<p>The best source is the CBT CD-ROM, which contains Rick Fochtman's OS/360
+distribution. This has not only the OS/360 distribution files, but also the
+source to the operating system and utilities, as well as some useful
+documentation. There are many, many other useful files and utilities
+on the disk, and it's a must for anyone wanting to experiment with OS/360,
+as well as any systems programmer on a modern OS/390 or z/OS system.
+Ordering information is at <a href="http://www.cbttape.org">the CBT
+Tape site</a>.</p>
+<h4><a name="2.4">2.4 JCL and control files</a></h4>
+<p>I've packed up the JCL, control files, replacements for files missing
+from Rick's distroibution, and HASP installation tapes in one handy place for
+downloading. Save <a href="os360ctl.tar.gz">this file</a> as os360ctl.tar.gz
+in your Hercules directory, then unpack it:<br>
+<code>tar xzvf os360ctl.tar.gz</code><br>
+It'll create a subdirectory named os360mvt, where all your work will be
+done. I'll reference the files by name throughout the rest of this
+document.</p>
+<h4><a name="2.5">2.5 Patience!</a></h4>
+<p>This whole process will take an hour or so. On a 500 MHz Pentium III
+laptop with 384 MB of RAM, stage 1 ran for me in about 1 minute, and stage 2
+about 5. If you go messing around with the JCL, <strong>especially</strong>
+with the dataset allocations for the target system, you won't know if
+there's a problem until about halfway through stage 2, and the easiest way
+to recover is to start over from scratch. The JCL and control files in the
+<code>os360ctl.tar.gz</code> file produced a clean system for me; I don't
+recommend messing with them until you've had a successful build, and then
+only if you really know what you're doing. This was a bigger problem when
+stage 2 took two hours to run, but it's still sound advice.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="overview.html">Previous: Overview</a>
+<a href="blddrv.html">Next: Building the driving system</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

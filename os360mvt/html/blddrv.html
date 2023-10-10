@@ -1,0 +1,54 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Building the driving system</title>
+<h1>OS/360 on Hercules: Building the driving system</h1>
+</head>
+<body>
+<hr>
+<h3>3. Building the driving system</h3>
+<h4><a name="3.1">3.1 Installing Hercules</a></h4>
+<p>Follow the instructions on installing Hercules on the <a
+href="http://www.conmicro.cx/hercules">Hercules Installation and Operation
+page</a>. Don't worry about the configuration files or creating DASD just
+yet. We'll do that in a moment.</p>
+<h4><a name="3.2">3.2 Building the MFT IPL volume</a></h4>
+The driving system is a small, prebuilt OS/360 MFT system that will fit on
+a single small disk drive and run on nearly any IBM System/360 or 370
+hardware. It has support for the common devices pregenerated at specific
+device addresses. The idea is to build a Hercules configuration that the
+supplied MFT starter system can talk to.</p>
+<p>The build process is performed by a shell script, <code>makedasd</code>.
+This script asks for the path to the OS/360 distribution, creates control
+files for Hercules' <code>dasdload</code> program, then calls it to build
+the disk images.</p>
+<p>The MFT IPL volume is built with the <code>dasdload</code> program. Using
+the generated <code>sysres.ctl</code> control file, a new disk image file is
+created and loaded with files from the OS/360 CD, in a format ready to IPL
+under Hercules. Once you've run <code>makedasd</code> the first time, you
+can build this volume manually, by doing:<br>
+<code>dasdload -z dasdsetup/sysres.ctl dasd/sysres.150</code><br>
+from the os360mvt directory, which you should have created as a subdirectory
+of your home directory. This creates and loads the disk image, and makes it
+almost ready for use.</p>
+<p>OS/360 IPL volumes need one additional step. The modules in
+<code>SYS1.SVCLIB</code> read each other directly from disk by using their
+absolute disk addresses. These must be set up explicitly. Normally, this is
+done by a program called <code>IEHIOSUP</code>, but we can't run it yet
+because we don't have a system to run it on. Fortunately, Hercules has an
+equivalent program that can be run from the command line.
+<code>makedasd</code> will run it for you, or you can do:<br>
+<code>dasdisup dasd/sysres.150</code><br>
+yourself.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="getstarted.html">Previous: Getting started</a>
+<a href="bldtgt.html">Next: Preparing to build MVT</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

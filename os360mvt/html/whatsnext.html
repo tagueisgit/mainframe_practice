@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>OS/360 on Hercules: What's next?</title>
+<h1>OS/360 on Hercules: What's next?</h1>
+</head>
+<body>
+<hr>
+<h3>12. What's next?</h3>
+<p>There are still several bugs to be fixed:
+<ul>
+<li>TSO logons get S305 ABENDs if more than 8 MB of memory is in the system.
+(Possibly, if the TSO region winds up below 8 MB, it might work even if more
+than that is defined, but I don't know a good way to find out.) For now,
+this problem can be avoided simply by defining only 8 MB, but a fix would be
+a Good Thing.
+<li>Earlier builds of this system encountered an S806 ABEND in HOSRDR. I
+don't know what happened to fix this problem, and it might reappear.
+</ul>
+As we come across other things that need fixing, they'll be noted here as
+well.</p>
+<p>I strongly recommend that you join the hercules-390 mailing list if
+you're interested in this system. As we find and fix bugs, that's the place
+they're noted first. You can subscribe via the Yahoo! Groups <a
+href="http://groups.yahoo.com/group/hercules-390">hercules-390 group
+page</a>. Another mailing list, <a
+href="http://groups.yahoo.com/group/hercules-os360">hercules-os360</a>, is
+dedicated specifically to OS/360 on Hercules, and is much lower volume.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="tsotcam.html">Previous: IPLing MVT</a>
+<a href="credits.html">Next: Acknowledgments</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/~jmaynard/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

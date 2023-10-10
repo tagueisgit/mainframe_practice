@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Preparing to build MVT</title>
+<h1>OS/360 on Hercules: Preparing to build MVT</h1>
+</head>
+<body>
+<hr>
+<h3>4. Preparing to build MVT</h3>
+<h4><a name="4.1">4.1 Building the MVT DLIB volumes</a></h4>
+<p>MVT is built by copying object files and assembling source code from a
+set of distribution libraries, or DLIBs. Those must be first loaded to disk.
+A real OS/360 generation was done by reading the DLIBs in from a
+distribution tape, but we have an easier way to do it:
+<code>dasdload</code>. The DLIBs take up most of one 3330 volume. After the
+first <code>makedasd</code> run, you can create this volume with:<br>
+<code>dasdload -z dasdsetup/dlib01.ctl dasd/dlib01.351</code><br>
+This will create the disk image file needed.</p>
+<h4><a name="4.2">4.2 Creating the MVT target and work volumes</a></h4>
+<p>The MVT system will be built on one 3330 volume. In addition, two work
+volumes are needed during the build process, one volume will be used
+to store non-IBM datasets and HASP, and one volume will be used for HASP's
+spool dataset, SYS1.HASPACE. All of these will be created
+with <code>dasdload</code>, as well, and loaded with empty datasets, ready
+for the gen to fill:<br>
+<code>dasdload -z dasdsetup/mvtres.ctl dasd/mvtres.350<br>
+dasdload -z dasdsetup/work01.ctl dasd/work01.151<br>
+dasdload -z dasdsetup/work02.ctl dasd/work02.352<br>
+dasdload -z dasdsetup/herc01.ctl dasd/herc01.152<br>
+dasdload -z dasdsetup/spool1.ctl dasd/spool1.153<br></code>
+This will create a total of five empty disk image files, ready to be
+used. <code>makedasd</code> will do these as well.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="blddrv.html">Previous: Building the driving system</a>
+<a href="prelim.html">Next: Getting ready for stage 1</a>
+</p>
+<hr>
+<address>
+<a href="http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 29 April 2005
+</body>
+</html>

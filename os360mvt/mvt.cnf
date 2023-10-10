@@ -1,0 +1,43 @@
+#
+# Configuration file for Hercules ESA/390 emulator
+#
+
+CPUSERIAL 000611
+CPUMODEL  0158
+MAINSIZE  8
+XPNDSIZE  0
+CNSLPORT  3270
+NUMCPU    1
+LOADPARM  ........
+SYSEPOCH  1988
+TZOFFSET  -0600
+ARCHMODE  S/370
+HTTPPORT  8081 noauth
+
+# .-----------------------------Device number
+# |     .-----------------------Device type
+# |     |       .---------------File name
+# |     |       |
+# V     V       V
+#---    ----    --------------------
+000C	2501    * intrq
+0280    3420    *
+0350    3330    dasd/mvtres.350
+000D	3525	pch00d.txt ascii
+000E	1403	prt00e.txt
+001E	1403	mvtlog.txt
+0150    3330    dasd/sysres.150
+0151	3330	dasd/work01.151
+0152    3330    dasd/herc01.152
+0153    3330    dasd/spool1.153
+0351    3330    dasd/dlib01.351
+0352	3330	dasd/work02.352
+001F    3215
+00C0    3270
+00C1    3270
+00C2    3270
+00C3    3270
+00C4    3270
+00C5    3270
+00C6    3270
+00C7    3270

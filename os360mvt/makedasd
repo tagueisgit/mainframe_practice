@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# Get the path to the distribution:
+echo -n "What is the path to your OS/360 distribution? "
+read DISTRIB_PATH
+while [ ! -f $DISTRIB_PATH/Reslibs/LINKLIB.XMI ]; do
+    echo -n "The distribution was not found there. What is the correct path?"
+    read DISTRIB_PATH
+done
+#
+# Create the loaded packs control files:
+cat >dasdsetup/sysres.ctl <<!EOF!
+#
+# Pack layout file for MFT system residence volume
+#
+sysres 3330 * dasdsetup/ieaipl00.rdr
+sysctlg         cvol    trk 1 0 0       ps f 256 256 8
+sys1.logrec     dip     trk 1 0 0       ps u 0 1944 0
+sysvtoc         vtoc    trk 16
+sys1.parmlib    xmit $DISTRIB_PATH/Reslibs/PARMLIB.XMI
+sys1.imagelib   xmit $DISTRIB_PATH/Reslibs/IMAGELIB.XMI
+sys1.nucleus    xmit $DISTRIB_PATH/Reslibs/NUCLEUS.XMI cyl
+sys1.linklib    xmit $DISTRIB_PATH/Reslibs/LINKLIB.XMI cyl
+sys1.svclib     xmit $DISTRIB_PATH/Reslibs/SVCLIB.XMI cyl
+sys1.proclib    xmit $DISTRIB_PATH/Reslibs/PROCLIB.XMI cyl
+sys1.sysjobqe   empty   cyl 40 0 0      da f 176 176 0
+sys1.dump       empty   cyl 15 0 0      ps u 0 7294 0
+sys1.coblib     xmit $DISTRIB_PATH/Reslibs/COBLIB.XMI
+sys1.maclib     xmit $DISTRIB_PATH/Reslibs/MACLIB.XMI
+sys1.pl1lib     xmit $DISTRIB_PATH/Reslibs/PL1LIB.XMI
+sys1.samplib    xmit $DISTRIB_PATH/Reslibs/SAMPLIB.XMI
+sys1.sortlib    xmit $DISTRIB_PATH/Reslibs/SORTLIB.XMI
+!EOF!
+cat >dasdsetup/dlib01.ctl <<!EOF!
+#
+# Pack layout file for OS/360 distribution library volume
+#
+dlib01 3330 *
+sysvtoc        vtoc trk 18
+sys1.modgen    xmit $DISTRIB_PATH/dlibs/MODGEN.XMI cyl 40 5
+sys1.modgen2   xmit $DISTRIB_PATH/dlibs/MODGEN2.XMI cyl 20 5
+sys1.genlib    xmit $DISTRIB_PATH/dlibs/GENLIB.XMI cyl 16 5
+sys1.coblib    xmit $DISTRIB_PATH/Reslibs/COBLIB.XMI
+sys1.parmlib   xmit $DISTRIB_PATH/Reslibs/PARMLIB.XMI
+sys1.pl1lib    xmit $DISTRIB_PATH/Reslibs/PL1LIB.XMI
+sys1.proclib   xmit $DISTRIB_PATH/Reslibs/PROCLIB.XMI
+sys1.sortlib   xmit $DISTRIB_PATH/Reslibs/SORTLIB.XMI
+sys1.al531     xmit $DISTRIB_PATH/dlibs/AL531.XMI
+sys1.as037     xmit $DISTRIB_PATH/dlibs/AS037.XMI
+sys1.cb545     xmit $DISTRIB_PATH/dlibs/CB545.XMI
+sys1.ci505     xmit $DISTRIB_PATH/dlibs/CI505.XMI
+sys1.ci535     xmit $DISTRIB_PATH/dlibs/CI535.XMI
+sys1.co503     xmit $DISTRIB_PATH/dlibs/CO503.XMI
+sys1.cq513     xmit $DISTRIB_PATH/dlibs/CQ513.XMI
+sys1.cq519     xmit $DISTRIB_PATH/dlibs/CQ519.XMI
+sys1.dm508     xmit $DISTRIB_PATH/dlibs/DM508.XMI
+sys1.dm509     xmit $DISTRIB_PATH/dlibs/DM509.XMI
+sys1.dn527     xmit $DISTRIB_PATH/dlibs/DN527.XMI
+sys1.dn533     xmit $DISTRIB_PATH/dlibs/DN533.XMI
+sys1.dn539     xmit $DISTRIB_PATH/dlibs/DN539.XMI
+sys1.dn554     xmit dasdsetup/dn554.xmi
+sys1.ed521     xmit $DISTRIB_PATH/dlibs/ED521.XMI
+sys1.fo500     xmit $DISTRIB_PATH/dlibs/FO500.XMI
+sys1.fo520     xmit $DISTRIB_PATH/dlibs/FO520.XMI
+sys1.fo550     xmit $DISTRIB_PATH/dlibs/FO550.XMI
+sys1.io523     xmit $DISTRIB_PATH/dlibs/IO523.XMI
+sys1.io526     xmit $DISTRIB_PATH/dlibs/IO526.XMI
+sys1.ld547     xmit $DISTRIB_PATH/dlibs/LD547.XMI
+sys1.lm501     xmit $DISTRIB_PATH/dlibs/LM501.XMI
+sys1.lm512     xmit $DISTRIB_PATH/dlibs/LM512.XMI
+sys1.lm532     xmit $DISTRIB_PATH/dlibs/LM532.XMI
+sys1.lm546     xmit $DISTRIB_PATH/dlibs/LM546.XMI
+sys1.lm537     xmit $DISTRIB_PATH/dlibs/LM537.XMI
+sys1.lm542     xmit $DISTRIB_PATH/dlibs/LM542.XMI
+sys1.nl511     xmit $DISTRIB_PATH/dlibs/NL511.XMI
+sys1.pl552     xmit $DISTRIB_PATH/dlibs/PL552.XMI
+sys1.pvtmacs   xmit $DISTRIB_PATH/dlibs/PVTMACS.XMI
+sys1.rc536     xmit $DISTRIB_PATH/dlibs/RC536.XMI
+sys1.rc541     xmit $DISTRIB_PATH/dlibs/RC541.XMI
+sys1.rc543     xmit $DISTRIB_PATH/dlibs/RC543.XMI
+sys1.rc551     xmit $DISTRIB_PATH/dlibs/RC551.XMI
+sys1.rg038     xmit $DISTRIB_PATH/dlibs/RG038.XMI
+sys1.sm023     xmit $DISTRIB_PATH/dlibs/SM023.XMI
+sys1.ut506     xmit $DISTRIB_PATH/dlibs/UT506.XMI
+sys1.dcmdlib   xmit $DISTRIB_PATH/dlibs/DCMDLIB.XMI
+sys1.dhelp     xmit $DISTRIB_PATH/dlibs/DHELP.XMI
+sys1.duads     xmit dasdsetup/sys1auad.xmi
+sys1.ci555     xmit $DISTRIB_PATH/dlibs/CI555.XMI
+sys1.cq548     xmit $DISTRIB_PATH/dlibs/CQ548.XMI
+sys1.maclib    xmit $DISTRIB_PATH/Reslibs/MACLIB.XMI
+sys1.genlibx   xmit $DISTRIB_PATH/dlibs/GENLIBX.XMI
+sys1.tsogen    xmit $DISTRIB_PATH/dlibs/TSOGEN.XMI
+sys1.tsomac    xmit $DISTRIB_PATH/Reslibs/TSOMAC.XMI
+sys1.tcammac   xmit $DISTRIB_PATH/Reslibs/TCAMMAC.XMI
+#sys1.fortlib   empty   cyl 4  2  40   po  u  0   13030 0
+sys1.fortlib   xmit dasdsetup/fortlib.xmi
+!EOF!
+#
+# Initialize the two loaded packs:
+dasdload -z dasdsetup/sysres.ctl dasd/sysres.150 0
+dasdisup dasd/sysres.150
+dasdload -z dasdsetup/dlib01.ctl dasd/dlib01.351 0
+#
+# Initialize the empty packs:
+dasdload -z dasdsetup/work01.ctl dasd/work01.151 0
+dasdload -z dasdsetup/work02.ctl dasd/work02.352 0
+dasdload -z dasdsetup/mvtres.ctl dasd/mvtres.350 0
+dasdload -z dasdsetup/herc01.ctl dasd/herc01.152 0
+dasdload -z dasdsetup/spool1.ctl dasd/spool1.153 0
+#
+# Tell the user we're done:
+echo DASD files creation complete.
+exit 0

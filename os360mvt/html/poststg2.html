@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>OS/360 on Hercules: Final MVT setup</title>
+<h1>OS/360 on Hercules: Final MVT setup</h1>
+</head>
+<body>
+<hr>
+<h3>8. Final MVT setup</h3>
+<h4><a name="8.1">8.1 MVT setup: MVTSETUP</a></h4>
+<p>There are a few final steps needed before the newly built system may be
+IPLed. The MVTSETUP job, in <code>mvtsetup.jcl</code>, does this. It
+contains four steps:
+<ul>
+<li><code>FIXRDR</code>: The supplied region size for the <code>RDR</code>
+task is too small, causing 804/80A ABENDs. The supplied default region size
+for jobs read by <code>RDR</code> is too small, as well, and if they ABEND,
+they take the initiator down with them. This step increases the
+<code>RDR</code> region from 48K to 64K, and the default job region from 50K
+to 128K.</li>
+<li><code>PRESRES</code>: Remember all those annoying mount messages? This
+step supplies a member for <code>SYS1.PARMLIB</code> that tells MVT the five
+volumes the system knows about are all reserved and not available for
+dismounting, and sets appropriate volume use attributes for them all.</li>
+<li><code>SMFDEFLT</code>: SMF was included in the generated system, since
+HASP requires it. This step changes the default SMF parameters to turn off
+recording of SMF data to disk, so we don't have to manage it later.</li>
+<li><code>CTLGMVT</code>: This step populates the target system catalog
+with the datasets that were just created.</li>
+<li><code>SCRTCHUT</code>: This step removes the four
+<code>SYS1.SYSUT<i>n</i></code> datasets used by stage 2. They are no
+longer needed once that has been completed, and the work space can
+be freed up for general system use.</li>
+</ul>
+This job should run quickly.</p>
+<h4><a name="8.2">8.2 Shutting down the driving system</a></h4>
+<p>We're finished with the driving system. Shut it down:<br>
+<code>p 00e</code><br>
+which should return with:<br>
+<code>IEF301I 00E WTR CLOSED P00</code><br>
+then halt the system:<br>
+<code>z eod</code><br>
+which should return:<br>
+<code>IEE334I HALT EOD SUCCESSFUL</code><br>
+At this point, MFT is stopped, and you can safely quit Hercules. If,
+instead, the system loops, go ahead and quit Hercules anyway; nothing
+serious will happen.</p>
+<hr>
+<p><a href="index.html">Up to table of contents</a>
+<a href="stage2.html">Previous: Running the stage2 sysgen</a>
+<a href="iplmvt.html">Next: IPLing MVT</a>
+</p>
+<hr>
+<address>
+<a href="http://http://www.conmicro.cx/">Jay Maynard,
+jmaynard@conmicro.cx</a>
+</address><p>
+Last updated 21 February 2003
+</body>
+</html>
