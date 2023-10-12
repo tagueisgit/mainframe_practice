@@ -12,8 +12,24 @@ Set up:
 ;; Open Emacs in full screen mode
 (set-frame-parameter nil 'fullscreen 'fullboth)
 
+;; Skip the startup screen
+(setq inhibit-startup-screen t)
+
 ;; Set theme
 (load-theme 'misterioso t)
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+
+;; Ensure that use-package is installed; if not, install it
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Now, load use-package
+(require 'use-package)
 
 ;; COBOL support
 (defun cobol-compile ()
